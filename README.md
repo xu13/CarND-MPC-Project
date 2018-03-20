@@ -1,7 +1,43 @@
 # CarND-Controls-MPC
 Self-Driving Car Engineer Nanodegree Program
 
+## Result
+
+Here is my result, click on the image to see the video on YouTube:
+
+<a href="https://youtu.be/VC_KDVK2Zpw" target="_blank">
+<img src="http://img.youtube.com/vi/VC_KDVK2Zpw/0.jpg"
+alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" />
+</a>
+
 ---
+## Rubic
+
+### The Model
+*Student describes their model in detail. This includes the state, actuators and update equations.*
+
+The kinematic model is given by the following update equation from Udacity course.
+
+<img src="./model.png" width="300" />
+
+The states include the x, y location, orientation (\psi), velocity (v). The augmented states also include the cross track error (cte), and the heading error (e\psi). The actuators are the acceleration (a) and steering angle (\delta).
+
+### Timestep Length and Elapsed Duration (N & dt)
+*Student discusses the reasoning behind the chosen N (timestep length) and dt (elapsed duration between timesteps) values. Additionally the student details the previous values tried.*
+
+The duration between timesteps is chosen to be 0.1sec which happens to be equal to the time delay we will be dealing with. 100ms is a reasonable timestep size, not so slow, but makes dealing with time delay easy. The timestep length is selected to be 10, which makes the total time length equals 1sec. Since my final speed target is set to be 90mph, time length of 1sec means about 40meters lookahead. This is reasonable lookahead distance consider the simple track we are driving on, while not slowing down the computation too much. I have also tried other combinations of N and dt, such as (20, 0.1), (20, 0.05), etc. And (10, 0.1) seems to be the best.
+
+### Polynomial Fitting and MPC Preprocessing
+*A polynomial is fitted to waypoints. If the student preprocesses waypoints, the vehicle state, and/or actuators prior to the MPC procedure it is described.*
+
+The waypoints received from the simulator are in the global coordinates, I transform it into the vehicle's local coordinates. This makes polynomial fitting much easier since the starting pose for every timestep is always (x = 0, y = 0, \psi = 0).
+
+### Model Predictive Control with Latency
+*The student implements Model Predictive Control that handles a 100 millisecond latency. Student provides details on how they deal with latency.*
+
+Given current vehicle state at time t, the MPC controller computes the control commands (acceleration, steering) for the next N timesteps based on the cost function defined. The first control command which corresponds to time t will be sent to actuators for execution. With no time delay, this control command will be executed at the right moment and everything is fine. However, if we have certain delay \tau caused by computation and communication, the command will arrive at the actuates at time t+\tau. If we still actuate with the command computed for time t, we will get unstable behavior. 
+
+If we know the latency \tau, we can actually do a forward simulation for \tau seconds using the same vehicle model and run MPC starting from the resulting state. Then when we sent the first control command which corresponds to time t+\tau, it will arrive at actuators at time t+\tau, and the control will be the correct one.
 
 ## Dependencies
 
